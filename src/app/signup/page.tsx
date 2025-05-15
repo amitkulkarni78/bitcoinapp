@@ -44,7 +44,7 @@ export default function Signup() {
         setError(data.message || 'Registration failed')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(`An error occurred. Please try again.${err}`)
     }
   }
 

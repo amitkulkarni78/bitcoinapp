@@ -22,7 +22,8 @@ export default function Dashboard() {
           setUserData(data)
         }
       } catch (error) {
-        console.error('Failed to fetch user data')
+
+        console.error('Failed to fetch user data', error)
       }
     }
 
@@ -36,7 +37,7 @@ export default function Dashboard() {
       })
       router.push('/login')
     } catch (error) {
-      console.error('Logout failed')
+      console.error('Logout failed', error)
     }
   }
 

@@ -33,7 +33,7 @@ export default function Login() {
         setError('Invalid credentials')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(`An error occurred. Please try again. ${err}`)
     }
   }
 
@@ -87,7 +87,7 @@ export default function Login() {
           </form>
 
           <p className="mt-4 text-center text-gray-400">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-blue-400 hover:text-blue-300">
               Sign up
             </Link>
