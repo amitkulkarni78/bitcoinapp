@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: "A secure and modern web application built with Next.js",
 };
 
+
 export default function RootLayout({
   children,
 }: {
