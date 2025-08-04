@@ -1,50 +1,53 @@
 'use client'
 
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
+import { Button } from '@/components/Button'
+import { Input } from '@/components/Input'
+import { apiRoutes, pageRoutes } from '@/lib/constants'
+import api from '@/lib/api'
+
+const signupSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
+
+type SignupFormInputs = z.infer<typeof signupSchema>
 
 export default function Signup() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormInputs>({
+    resolver: zodResolver(signupSchema),
   })
-  const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
+  const onSubmit = async (data: SignupFormInputs) => {
+    setApiError(null)
     try {
-      // Here you would typically make an API call to your registration endpoint
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
-      })
-
-      if (response.ok) {
-        router.push('/login')
+      await api.post(apiRoutes.signup, data)
+      router.push(pageRoutes.login)
+    } catch (error) {
+      if (error instanceof Error) {
+        setApiError(error.message)
       } else {
-        const data = await response.json()
-        setError(data.message || 'Registration failed')
+        setApiError('An unexpected error occurred')
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.')
     }
   }
 
@@ -53,83 +56,83 @@ export default function Signup() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto bg-gray-800 rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
-          
-          {error && (
-            <div className="bg-red-500 text-white p-3 rounded mb-4">
-              {error}
+
+          {apiError && (
+            <div className="bg-red-500 text-white p-3 rounded mb-4 text-center">
+              {apiError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium mb-2">
                 Name
               </label>
-              <input
-                type="text"
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <Input id="name" type="text" {...register('name')} />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Email
               </label>
-              <input
-                type="email"
-                id="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <Input id="email" type="email" {...register('email')} />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2"
+              >
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                minLength={8}
-              />
+              <Input id="password" type="password" {...register('password')} />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium mb-2"
+              >
                 Confirm Password
               </label>
-              <input
-                type="password"
+              <Input
                 id="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                minLength={8}
+                type="password"
+                {...register('confirmPassword')}
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
-            >
-              Sign Up
-            </button>
+            <Button type="submit" fullWidth disabled={isSubmitting} variant="primary">
+              {isSubmitting ? 'Signing up...' : 'Sign Up'}
+            </Button>
           </form>
 
           <p className="mt-4 text-center text-gray-400">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300">
+            <Link
+              href={pageRoutes.login}
+              className="text-blue-400 hover:text-blue-300"
+            >
               Login
             </Link>
           </p>
@@ -137,4 +140,4 @@ export default function Signup() {
       </div>
     </main>
   )
-} 
+}

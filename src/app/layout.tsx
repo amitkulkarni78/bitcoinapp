@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { navLinks } from "@/lib/constants";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,18 +27,15 @@ export default function RootLayout({
                 Your App
               </Link>
               <div className="space-x-4">
-                <Link href="/" className="hover:text-gray-300">
-                  Home
-                </Link>
-                <Link href="/about" className="hover:text-gray-300">
-                  About
-                </Link>
-                <Link href="/login" className="hover:text-gray-300">
-                  Login
-                </Link>
-                <Link href="/signup" className="hover:text-gray-300">
-                  Sign Up
-                </Link>
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="hover:text-gray-300"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             </div>
           </nav>

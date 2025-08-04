@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Button } from '@/components/Button'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -21,7 +22,7 @@ export default function Dashboard() {
           const data = await response.json()
           setUserData(data)
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Failed to fetch user data')
       }
     }
@@ -35,7 +36,7 @@ export default function Dashboard() {
         method: 'POST',
       })
       router.push('/login')
-    } catch (error) {
+    } catch (_error) {
       console.error('Logout failed')
     }
   }
@@ -45,12 +46,12 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <button
+          <Button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+            variant="secondary"
           >
             Logout
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -73,9 +74,7 @@ export default function Dashboard() {
               >
                 Go to Chat Room
               </Link>
-              <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition duration-300">
-                Edit Profile
-              </button>
+              <Button fullWidth variant="secondary">Edit Profile</Button>
             </div>
           </div>
 
